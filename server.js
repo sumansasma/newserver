@@ -68,32 +68,35 @@ const db = new sqlite3.Database('events.db', (err) => {
             )
         `);
         db.run(`
-            CREATE TABLE IF NOT EXISTS participants (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                eventId INTEGER,
-                name TEXT,
-                phoneNumber TEXT,
-                FOREIGN KEY (eventId) REFERENCES events(id)
-            )
-        `);
+    CREATE TABLE IF NOT EXISTS participants (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        eventId INTEGER,
+        name TEXT,
+        phoneNumber TEXT,
+        eventName TEXT, -- Add this column for event name
+        confirmationCode TEXT, -- Add this column for confirmation code
+        FOREIGN KEY (eventId) REFERENCES events(id)
+    )
+`);
+
     }
 });
 
-// Define a GET route for /api/participants/:eventId
 app.get('/api/participants/:eventId', (req, res) => {
     const eventId = req.params.eventId;
 
     // Replace this with your actual database query to fetch participants by event ID
-    db.all('SELECT * FROM participants WHERE eventId = ?', [eventId], (err, rows) => {
+    db.all('SELECT id, name, phoneNumber, eventName, confirmationCode FROM participants WHERE eventId = ?', [eventId], (err, rows) => {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ message: 'Error fetching participants.' });
         }
 
-        // Send a JSON response with the participants
+        // Send a JSON response with the participants, including event name and confirmation code
         res.json(rows);
     });
 });
+
 
 
 // Define a GET route for /api/events
@@ -147,13 +150,13 @@ app.post('/api/events', (req, res) => {
 });
 
 app.post('/api/participants', (req, res) => {
-    const { eventId, name, phoneNumber } = req.body;
+    const { eventId, name, phoneNumber, eventName, confirmationCode } = req.body;
 
-    if (!eventId || !name || !phoneNumber ) {
-        return res.status(400).json({ message: 'Event ID, name, phone number are required.' });
+    if (!eventId || !name || !phoneNumber || !eventName || !confirmationCode) {
+        return res.status(400).json({ message: 'Event ID, name, phone number, event name, and confirmation code are required.' });
     }
 
-    db.run('INSERT INTO participants (eventId, name, phoneNumber) VALUES (?, ?, ?)', [eventId, name, phoneNumber], function (err) {
+    db.run('INSERT INTO participants (eventId, name, phoneNumber, eventName, confirmationCode) VALUES (?, ?, ?, ?, ?)', [eventId, name, phoneNumber, eventName, confirmationCode], function (err) {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ message: 'Participant registration failed.' });
