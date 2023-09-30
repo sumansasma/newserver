@@ -73,7 +73,6 @@ const db = new sqlite3.Database('events.db', (err) => {
                 eventId INTEGER,
                 name TEXT,
                 phoneNumber TEXT,
-                email TEXT,
                 FOREIGN KEY (eventId) REFERENCES events(id)
             )
         `);
@@ -148,13 +147,13 @@ app.post('/api/events', (req, res) => {
 });
 
 app.post('/api/participants', (req, res) => {
-    const { eventId, name, phoneNumber, email } = req.body;
+    const { eventId, name, phoneNumber } = req.body;
 
-    if (!eventId || !name || !phoneNumber || !email ) {
-        return res.status(400).json({ message: 'Event ID, name, phone number, and email are required.' });
+    if (!eventId || !name || !phoneNumber ) {
+        return res.status(400).json({ message: 'Event ID, name, phone number are required.' });
     }
 
-    db.run('INSERT INTO participants (eventId, name, phoneNumber, email) VALUES (?, ?, ?, ?)', [eventId, name, phoneNumber, email], function (err) {
+    db.run('INSERT INTO participants (eventId, name, phoneNumber) VALUES (?, ?, ?)', [eventId, name, phoneNumber], function (err) {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ message: 'Participant registration failed.' });
