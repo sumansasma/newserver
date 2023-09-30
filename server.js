@@ -39,19 +39,6 @@ app.delete('/api/events/:eventId', (req, res) => {
     });
 });
 
-app.delete('/api/participants/:participantId', (req, res) => {
-    const participantId = req.params.participantId;
-
-    // Replace this with your actual database query to delete the participant by ID
-    db.run('DELETE FROM participants WHERE id = ?', [participantId], (err) => {
-        if (err) {
-            console.error(err.message);
-            return res.status(500).json({ message: 'Error deleting the participant.' });
-        }
-
-        res.status(200).json({ message: 'Participant deleted successfully.' });
-    });
-});
 
 // Create a SQLite database and initialize tables
 const db = new sqlite3.Database('events.db', (err) => {
@@ -73,6 +60,7 @@ const db = new sqlite3.Database('events.db', (err) => {
                 eventId INTEGER,
                 name TEXT,
                 phoneNumber TEXT,
+                email TEXT,
                 FOREIGN KEY (eventId) REFERENCES events(id)
             )
         `);
@@ -147,13 +135,13 @@ app.post('/api/events', (req, res) => {
 });
 
 app.post('/api/participants', (req, res) => {
-    const { eventId, name, phoneNumber } = req.body;
+    const { eventId, name, phoneNumber, email } = req.body;
 
-    if (!eventId || !name || !phoneNumber) {
-        return res.status(400).json({ message: 'Event ID, name, and phone number are required.' });
+    if (!eventId || !name || !phoneNumber ) {
+        return res.status(400).json({ message: 'Event ID, name, and phone number, are required.' });
     }
 
-    db.run('INSERT INTO participants (eventId, name, phoneNumber) VALUES (?, ?, ?)', [eventId, name, phoneNumber], function (err) {
+    db.run('INSERT INTO participants (eventId, name, phoneNumber, email) VALUES (?, ?, ?, ?)', [eventId, name, phoneNumber, email], function (err) {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ message: 'Participant registration failed.' });
