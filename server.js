@@ -70,11 +70,8 @@ const db = new sqlite3.Database('events.db', (err) => {
         db.run(`
     CREATE TABLE IF NOT EXISTS participants (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        eventId INTEGER,
         name TEXT,
         phoneNumber TEXT,
-        eventName TEXT, -- Add this column for event name
-        confirmationCode TEXT, -- Add this column for confirmation code
         FOREIGN KEY (eventId) REFERENCES events(id)
     )
 `);
@@ -150,13 +147,13 @@ app.post('/api/events', (req, res) => {
 });
 
 app.post('/api/participants', (req, res) => {
-    const { eventId, name, phoneNumber, eventName, confirmationCode } = req.body;
+    const { eventId, name, phoneNumber } = req.body;
 
-    if (!eventId || !name || !phoneNumber || !eventName || !confirmationCode) {
-        return res.status(400).json({ message: 'Event ID, name, phone number, event name, and confirmation code are required.' });
+    if (!eventId || !name || !phoneNumber) {
+        return res.status(400).json({ message: 'Event ID, name, and phone number are required.' });
     }
 
-    db.run('INSERT INTO participants (eventId, name, phoneNumber, eventName, confirmationCode) VALUES (?, ?, ?, ?, ?)', [eventId, name, phoneNumber, eventName, confirmationCode], function (err) {
+    db.run('INSERT INTO participants (eventId, name, phoneNumber) VALUES (?, ?, ?)', [eventId, name, phoneNumber], function (err) {
         if (err) {
             console.error(err.message);
             return res.status(500).json({ message: 'Participant registration failed.' });
