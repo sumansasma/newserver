@@ -137,8 +137,8 @@ app.post('/api/events', (req, res) => {
 app.post('/api/participants', (req, res) => {
     const { eventId, name, phoneNumber, email } = req.body;
 
-    if (!eventId || !name || !phoneNumber ) {
-        return res.status(400).json({ message: 'Event ID, name, and phone number, are required.' });
+    if (!eventId || !name || !phoneNumber || !email ) {
+        return res.status(400).json({ message: 'Event ID, name, phone number, and email are required.' });
     }
 
     db.run('INSERT INTO participants (eventId, name, phoneNumber, email) VALUES (?, ?, ?, ?)', [eventId, name, phoneNumber, email], function (err) {
